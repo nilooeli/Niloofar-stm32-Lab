@@ -53,3 +53,17 @@ dkms.conf
 
 # debug information files
 *.dwo
+
+# STM32CubeIDE build artefacts
+Debug/
+Release/
+
+# Binaries & maps
+*.elf
+*.hex
+*.bin
+*.map
+*.list
+
+# Launch-config files (debugger-specific)
+*.launch
