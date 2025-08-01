@@ -42,6 +42,8 @@ Build (hammer icon) → Debug/Run (green bug/play)
 
 Demo 01 — LED Blink
 Goal: Toggle the on-board LED LD2 to verify GPIO output and project setup.
+#### Demo Gallery
+![NUCLEO-F401RE running LED blink](docs/led_blink_nucleo.jpg)
 
 Pin & Clock
 LD2: GPIOA → PIN_5 (push-pull, no pull, low speed is fine)
