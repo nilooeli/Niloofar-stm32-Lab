@@ -1,14 +1,14 @@
-# Niloofar-stm32-Lab
-Journey to embedded mastery—STM32F4 demos, diagrams, and clean CubeIDE code.
-
-New-Item docs\fig_hw_block.png    -ItemType File
-New-Item docs\power_profile.xlsx  -ItemType File
-New-Item fw\EnvNode.ioc           -ItemType File
 
 Niloofar’s STM32 Lab
 Hands-on mini-projects for the NUCLEO-F401RE to practice core MCU skills (GPIO, timers, interrupts, UART, I²C, ADC, DMA, FreeRTOS, and low-power). Each demo is small, documented, and easy to import into STM32CubeIDE.
 
 Repo Map
+├── blink_LED/          # Demo 01: LD2 blink (CubeIDE project)
+├── docs/               # Images & diagrams
+├── fw/                 # (Optional) shared code for future demos
+├── test/               # Test notes/scripts
+└── README.md
+
 bash
 Copy
 Edit
@@ -42,13 +42,13 @@ Build (hammer icon) → Debug/Run (green bug/play)
 
 Demo 01 — LED Blink
 Goal: Toggle the on-board LED LD2 to verify GPIO output and project setup.
-#### Demo Gallery
-![blink](https://github.com/nilooeli/Niloofar-stm32-Lab/blob/main/docs/led_blink_nucleo.jpg?raw=1)
+## Demo Gallery
+<img src="docs/led_blink_nucleo.jpg" alt="LED blink" width="480">
 
-Pin & Clock
+### Pin & Clock
 LD2: GPIOA → PIN_5 (push-pull, no pull, low speed is fine)
 
-Clock: default HSI/HSE is fine; HAL_Delay() uses SysTick
+### Clock: default HSI/HSE is fine; HAL_Delay() uses SysTick
 
 Key Code (simplified)
 c
@@ -64,7 +64,7 @@ Edit the HAL_Delay(…) value, rebuild, and flash.
 
 Or use a timer interrupt later for precise non-blocking timing.
 
-What You Should See
+### What You Should See
 The green LED near the Arduino D13 header blinks at ~2 Hz (500 ms on/off).
 
 Troubleshooting
