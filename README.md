@@ -4,6 +4,10 @@ This repository contains a series of embedded systems projects developed on the 
 
 ---
 
+## System Diagram
+
+![System Diagram](docs/System%20Diagram.png)
+
 ## 📚 Overview
 
 Each project demonstrates a specific STM32 feature or embedded design pattern. They are structured in folders under `fw/` (firmware), named `P0`, `P1`, etc., to reflect the order and complexity of development.
