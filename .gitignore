@@ -60,6 +60,9 @@ dkms.conf
 # STM32CubeIDE build artefacts
 Debug/
 Release/
+/.build/
+/*.launch/
+*.iwd
 
 # Binaries & maps
 *.elf
