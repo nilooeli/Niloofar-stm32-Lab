@@ -1,3 +1,6 @@
+# Ignore Eclipse/STM32CubeIDE workspace metadata
+/.metadata/
+
 # Prerequisites
 *.d
 
