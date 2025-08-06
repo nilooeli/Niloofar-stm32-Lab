@@ -1,0 +1,34 @@
+#include "pot_pwm.h"
+#include "main.h"
+#include "adc.h"
+#include "tim.h"
+#include "usart.h"
+
+extern ADC_HandleTypeDef hadc1;
+extern TIM_HandleTypeDef htim2;
+
+void PotPWM_Init(void)
+{
+	// Start PWM and ADC
+	HAL_TIM_PWM_Start(&htim2, TIM_CHANNEL_1);
+	__HAL_TIM_SET_COMPARE(&htim2, TIM_CHANNEL_1, 0);
+	HAL_ADC_Start(&hadc1);
+}
+
+void PotPWM_Update(void)
+{
+	// Wait for one conversion
+	HAL_ADC_PollForConversion(&hadc1, HAL_MAX_DELAY);
+	uint32_t raw = HAL_ADC_GetValue(&hadc1);
+
+	  // Debug print
+	  char buf[32];
+	  int len = snprintf(buf, sizeof(buf), "ADC raw=%4lu\r\n", raw);
+	  HAL_UART_Transmit(&huart2, (uint8_t*)buf, len, HAL_MAX_DELAY);
+
+	  uint32_t period = __HAL_TIM_GET_AUTORELOAD(&htim2);
+	  uint32_t ccr = (raw * period) / 4095;
+
+	// Update duty
+	__HAL_TIM_SET_COMPARE(&htim2, TIM_CHANNEL_1, ccr);
+}

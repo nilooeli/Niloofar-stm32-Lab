@@ -1,0 +1,43 @@
+#include "pot_pwm.h"
+#include "main.h"
+#include "adc.h"
+#include "tim.h"
+#include "usart.h"
+
+extern ADC_HandleTypeDef hadc1;
+extern TIM_HandleTypeDef htim2;
+
+static uint32_t raw_min = UINT32_MAX;
+static uint32_t raw_max = 0;
+
+void PotPWM_Init(void)
+{
+	// Start PWM and ADC
+	HAL_TIM_PWM_Start(&htim2, TIM_CHANNEL_1);
+	__HAL_TIM_SET_COMPARE(&htim2, TIM_CHANNEL_1, 0);
+	HAL_ADC_Start(&hadc1);
+}
+
+void PotPWM_Update(void)
+{
+	// Wait for one conversion
+	HAL_ADC_PollForConversion(&hadc1, HAL_MAX_DELAY);
+	uint32_t raw = HAL_ADC_GetValue(&hadc1);
+
+	// update out observed min/max
+	if (raw < raw_min)
+		raw_min = raw;
+	if (raw > raw_max)
+		raw_max = raw;
+
+	// compute span (avoid divide-by-zero)
+	uint32_t span = (raw_max > raw_min) ? (raw_max - raw_min) : 1;
+
+	// map [raw_min...raw_max] -> [0...period]
+	uint32_t period = __HAL_TIM_GET_AUTORELOAD(&htim2);
+	uint32_t ccr = ((raw - raw_min) * period) / span;
+
+
+	// Update duty
+	__HAL_TIM_SET_COMPARE(&htim2, TIM_CHANNEL_1, ccr);
+}
