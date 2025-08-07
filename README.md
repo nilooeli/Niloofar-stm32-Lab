@@ -1,91 +1,108 @@
-## STM32 Lab Projects (STM32F401RE)
 
-This repository contains a series of embedded systems projects developed on the **STM32F401RE Nucleo** board using **STM32CubeIDE** and the **HAL** driver framework. The goal is to build up embedded programming skills through progressive hands-on labs, ranging from basic GPIO to advanced DMA, FreeRTOS, and low-power applications.
+Niloofar’s STM32 Lab
+Hands-on mini-projects for the NUCLEO-F401RE to practice core MCU skills (GPIO, timers, interrupts, UART, I²C, ADC, DMA, FreeRTOS, and low-power). Each demo is small, documented, and easy to import into STM32CubeIDE.
 
----
+Repo Map
+├── blink_LED/          # Demo 01: LD2 blink (CubeIDE project)
+├── docs/               # Images & diagrams
+├── fw/                 # (Optional) shared code for future demos
+├── test/               # Test notes/scripts
+└── README.md
 
-## System Diagram
-
-![System Diagram](docs/System%20Diagram.png)
-
-## 📚 Overview
-
-Each project demonstrates a specific STM32 feature or embedded design pattern. They are structured in folders under `fw/` (firmware), named `P0`, `P1`, etc., to reflect the order and complexity of development.
-
----
-
-## 📋 Project Task Table
-
-| Project | Feature                             | Goal                       | Done When                                    |
-|---------|-------------------------------------|----------------------------|-----------------------------|
-| **P0**  | GPIO + Clock Init                   | Blink LED @ 1Hz            | LED blinks reliably                          |
-| **P1**  | UART2 Printf                        | PC serial I/O              | "Hello, STM32" prints in terminal            |
-| **P2**  | EXTI Pushbutton + Debounce         | Interrupt + debounce       | Button press toggles LED once                |
-| **P3**  | TIM1 PWM -> LED                     | Hardware PWM               | LED fades smoothly                           |
-| **P4**  | ADC1 Potentiometer -> PWM          | Analog read + LED control  | Pot controls brightness                      |
-| **P5**  | I2C BMP280 (WHOAMI + raw)          | Basic I2C                  | IDs and raw values print                     |
-| **P6**  | BMP280 Calibration                 | Engineering units          | Temp/Pressure values look stable             |
-| **P7**  | UART Streaming                     | Structured CSV/JSON logs   | Log 60+ seconds without drop                 |
-| **P8**  | UART TX via DMA                    | Non-blocking comms         | System stays responsive during logging       |
-| **P9**  | Data Logging (Flash/SD)            | On-device storage          | Records survive power cycle                  |
-| **P10** | UART CLI                           | Runtime control            | You can change settings live                 |
-| **P11** | FreeRTOS Task Split                | Concurrency                | No starvation across tasks                   |
-| **P12** | Low Power + RTC                    | Energy awareness           | System sleeps + wakes reliably               |
-| **P13** | I2C DMA                            | Offload sensor reads       | Reads use minimal CPU                        |
-| **P14** | Watchdog + Fault Logging           | Self-recovery              | System resets + logs fault cause             |
-| **P15** | Integrated Demo App                | Interview showcase         | Full demo script runs end-to-end             |
-
----
-
-## 🧰 Tools & Environment
-
-- **Board**: STM32F401RE Nucleo
-- **IDE**: STM32CubeIDE
-- **Framework**: STM32 HAL (Hardware Abstraction Layer)
-- **Interface**: ST-Link USB (UART via virtual COM)
-- **Terminals**: PuTTY / Tera Term for serial output
-
----
-
-## 📁 Folder Structure
-
-Niloofar-stm32-Lab/
-├── fw/
-│ ├── P0_BlinkLED/
-│ ├── UART-Printf/
-│ ├── P2_EXTI_Button/
-│ └── ...
-├── images/
-├── .gitignore
-└── README.md ← you are here
-
-yaml
+bash
 Copy
 Edit
+.
+├── blink_LED/          # Demo 01: LD2 blink (CubeIDE project)
+├── docs/               # Diagrams, screenshots, photos, GIFs
+├── fw/                 # (Optional) shared headers/helpers for future demos
+├── test/               # Simple test notes/scripts (if any)
+├── LICENSE             # MIT
+└── README.md
+Tip: Keep each demo self-contained (one CubeIDE project per folder) so nothing breaks when you add new features.
 
----
+Board & Tools
+Board: NUCLEO-F401RE (on-board user LED LD2 = PA5 = Arduino D13)
 
-## 🏁 Getting Started
+IDE: STM32CubeIDE 1.19.0 (HAL)
 
-To run any project:
+Programmer: ST-LINK (integrated on Nucleo)
 
-1. Clone the repository:
-   ```bash
-   git clone https://github.com/nilooeli/Niloofar-stm32-Lab.git
-Open the .ioc file of the project in STM32CubeIDE.
+Host OS: Windows 10 (works on macOS/Linux too)
 
-Build and flash to the STM32F401RE board via ST-Link.
+How to Import a Demo (CubeIDE)
+Clone the repo
+git clone https://github.com/nilooeli/Niloofar-stm32-Lab.git
 
-Monitor UART output if applicable (115200 8N1 via COM port).
+Open STM32CubeIDE → File ▸ Import… ▸ Existing Projects into Workspace
 
-💡 Future Plans
- Add project diagrams for each task
+Browse to the demo folder (e.g. blink_LED/) → Finish
 
- Add build instructions and test results per folder
+Build (hammer icon) → Debug/Run (green bug/play)
 
- Include logic analyzer screenshots for verification
+Demo 01 — LED Blink
+Goal: Toggle the on-board LED LD2 to verify GPIO output and project setup.
+## Demo Gallery
+<img src="docs/led_blink_nucleo.jpg" alt="LED blink" width="480">
 
- Write blog or documentation pages per milestone
+### Pin & Clock
+LD2: GPIOA → PIN_5 (push-pull, no pull, low speed is fine)
 
-🙏 Acknowledgments
-Special thanks to STMicroelectronics, CubeIDE team, and the embedded systems community for resources and tools.
+### Clock: default HSI/HSE is fine; HAL_Delay() uses SysTick
+
+Key Code (simplified)
+c
+Copy
+Edit
+// After HAL_Init(), SystemClock_Config(), and MX_GPIO_Init()
+while (1) {
+    HAL_GPIO_TogglePin(GPIOA, GPIO_PIN_5); // LD2 on PA5
+    HAL_Delay(500); // ms; change for faster/slower blink
+}
+Change the Blink Rate
+Edit the HAL_Delay(…) value, rebuild, and flash.
+
+Or use a timer interrupt later for precise non-blocking timing.
+
+### What You Should See
+The green LED near the Arduino D13 header blinks at ~2 Hz (500 ms on/off).
+
+Troubleshooting
+Nothing blinks
+
+Check power LED is on; USB cable supports data.
+
+Confirm PA5 is set as GPIO_Output in .ioc (and MX_GPIO_Init() is called).
+
+Make sure you imported the project folder, not just source files.
+
+Clean build: Project ▸ Clean… then build again.
+
+ST-LINK not found: Run ▸ Debug Configurations… ▸ STM32 Cortex-M C/C++ Application → select the right project/ELF; update ST-LINK firmware via STM32CubeProgrammer if needed.
+
+Build errors about HAL headers
+
+The generated Core/Inc and Drivers include paths must exist. If missing, regenerate code from the .ioc or re-import the project.
+
+Delay is wrong
+
+Check SystemClock_Config() runs and HAL_Init() sets SysTick. Avoid changing SysTick if you later add FreeRTOS.
+
+Git Tips (short)
+Commit per demo step; write clear messages, e.g. demo(blink): initial GPIO PA5
+
+Tag stable milestones, e.g. demo/led-blink-v1
+
+Keep build folders out of Git with a .gitignore (add /Debug/, /Release/, /build/, .settings/)
+
+Example .gitignore:
+
+swift
+Copy
+Edit
+/Debug/
+/Release/
+/build/
+/*.log
+*.ioc-backup
+.settings/
