@@ -2,107 +2,61 @@
 Niloofar’s STM32 Lab
 Hands-on mini-projects for the NUCLEO-F401RE to practice core MCU skills (GPIO, timers, interrupts, UART, I²C, ADC, DMA, FreeRTOS, and low-power). Each demo is small, documented, and easy to import into STM32CubeIDE.
 
-Repo Map
-├── blink_LED/          # Demo 01: LD2 blink (CubeIDE project)
-├── docs/               # Images & diagrams
-├── fw/                 # (Optional) shared code for future demos
-├── test/               # Test notes/scripts
-└── README.md
+fw/UART-Printf - UART Printf Redirection on STM32F401RE This project demonstrates how to retarget the standard printf() function in C to transmit debug messages over UART using STM32 HAL functions. It is based on the STM32F401RE Nucleo board and developed using STM32CubeIDE.
 
-bash
-Copy
-Edit
-.
-├── blink_LED/          # Demo 01: LD2 blink (CubeIDE project)
-├── docs/               # Diagrams, screenshots, photos, GIFs
-├── fw/                 # (Optional) shared headers/helpers for future demos
-├── test/               # Simple test notes/scripts (if any)
-├── LICENSE             # MIT
-└── README.md
-Tip: Keep each demo self-contained (one CubeIDE project per folder) so nothing breaks when you add new features.
+Goal
+Enable printf() for sending strings over UART to a serial terminal (e.g., PuTTY, Tera Term).
 
-Board & Tools
-Board: NUCLEO-F401RE (on-board user LED LD2 = PA5 = Arduino D13)
+Features
+UART2 configured for communication
 
-IDE: STM32CubeIDE 1.19.0 (HAL)
+Retargeted printf() via _write() function
 
-Programmer: ST-LINK (integrated on Nucleo)
+Transmits strings to a serial terminal over USB
 
-Host OS: Windows 10 (works on macOS/Linux too)
+Uses HAL drivers (no low-level register manipulation)
 
-How to Import a Demo (CubeIDE)
-Clone the repo
-git clone https://github.com/nilooeli/Niloofar-stm32-Lab.git
+Hardware
+Component Connection STM32F401RE Nucleo board UART2 (TX) PA2 UART2 (RX) PA3 (optional) USB connection ST-Link USB
 
-Open STM32CubeIDE → File ▸ Import… ▸ Existing Projects into Workspace
+UART2 is connected internally to the ST-Link virtual COM port on the Nucleo board.
 
-Browse to the demo folder (e.g. blink_LED/) → Finish
+Configuration Summary
+STM32CubeMX Settings: USART2:
 
-Build (hammer icon) → Debug/Run (green bug/play)
+Baud Rate: 115200
 
-Demo 01 — LED Blink
-Goal: Toggle the on-board LED LD2 to verify GPIO output and project setup.
-## Demo Gallery
-<img src="docs/led_blink_nucleo.jpg" alt="LED blink" width="480">
+Word Length: 8 Bits
 
-### Pin & Clock
-LD2: GPIOA → PIN_5 (push-pull, no pull, low speed is fine)
+Stop Bits: 1
 
-### Clock: default HSI/HSE is fine; HAL_Delay() uses SysTick
+Parity: None
 
-Key Code (simplified)
-c
-Copy
-Edit
-// After HAL_Init(), SystemClock_Config(), and MX_GPIO_Init()
-while (1) {
-    HAL_GPIO_TogglePin(GPIOA, GPIO_PIN_5); // LD2 on PA5
-    HAL_Delay(500); // ms; change for faster/slower blink
-}
-Change the Blink Rate
-Edit the HAL_Delay(…) value, rebuild, and flash.
+Mode: TX
 
-Or use a timer interrupt later for precise non-blocking timing.
+NVIC:
 
-### What You Should See
-The green LED near the Arduino D13 header blinks at ~2 Hz (500 ms on/off).
+No UART interrupts needed
 
-Troubleshooting
-Nothing blinks
+Retarget printf() Add this to retarget.c or main.c:
 
-Check power LED is on; USB cable supports data.
+c Copy Edit int _write(int file, char data, int len) { HAL_UART_Transmit(&huart2, (uint8_t)data, len, HAL_MAX_DELAY); return len; } Note: huart2 must be declared as extern if used in another file.
 
-Confirm PA5 is set as GPIO_Output in .ioc (and MX_GPIO_Init() is called).
+How to Run
+Flash the firmware to the STM32 board.
 
-Make sure you imported the project folder, not just source files.
+Open a serial terminal (e.g., PuTTY):
 
-Clean build: Project ▸ Clean… then build again.
+Port: Check the COM port of your Nucleo ST-Link.
 
-ST-LINK not found: Run ▸ Debug Configurations… ▸ STM32 Cortex-M C/C++ Application → select the right project/ELF; update ST-LINK firmware via STM32CubeProgrammer if needed.
+Baudrate: 115200
 
-Build errors about HAL headers
+Reset the board — you should see output messages via printf().
 
-The generated Core/Inc and Drivers include paths must exist. If missing, regenerate code from the .ioc or re-import the project.
+Folder Structure
+bash Copy Edit fw/UART-Printf/ ├── Core/ │ ├── Src/ │ └── Inc/ ├── .ioc # STM32CubeMX config ├── README.md # This file 📎 Example Output makefile Copy Edit System Initialized. Temperature: 24.3 C Status: OK
 
-Delay is wrong
+References
+STM32 HAL Documentation
 
-Check SystemClock_Config() runs and HAL_Init() sets SysTick. Avoid changing SysTick if you later add FreeRTOS.
-
-Git Tips (short)
-Commit per demo step; write clear messages, e.g. demo(blink): initial GPIO PA5
-
-Tag stable milestones, e.g. demo/led-blink-v1
-
-Keep build folders out of Git with a .gitignore (add /Debug/, /Release/, /build/, .settings/)
-
-Example .gitignore:
-
-swift
-Copy
-Edit
-/Debug/
-/Release/
-/build/
-/*.log
-*.ioc-backup
-.settings/
+Nucleo Virtual COM Port Info
