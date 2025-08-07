@@ -1,0 +1,32 @@
+#include "button_exti.h"
+
+extern TIM_HandleTypeDef htim1; // Use TIM1 for debounce
+
+void Button_EXTI_Init(void)
+{
+
+}
+
+void Button_EXTI_Handler(uint16_t GPIO_Pin)
+{
+	if (GPIO_Pin == GPIO_PIN_13)
+	{
+		HAL_NVIC_DisableIRQ(EXTI15_10_IRQn); // Prevent re-trigger
+		HAL_TIM_Base_Start_IT(&htim1);  // Start debounce timer
+	}
+}
+
+void Button_Debounce_Timer_Handler(TIM_HandleTypeDef *htim)
+{
+	if (htim->Instance == TIM1)
+	{
+		HAL_TIM_Base_Stop_IT(htim);  // Stop timer
+
+		if (HAL_GPIO_ReadPin(GPIOC, GPIO_PIN_13) == GPIO_PIN_RESET)
+		{
+			HAL_GPIO_TogglePin(GPIOA, GPIO_PIN_5); // Toggle LED
+		}
+
+		HAL_NVIC_EnableIRQ(EXTI15_10_IRQn);  // Re-enable EXTI
+	}
+}
