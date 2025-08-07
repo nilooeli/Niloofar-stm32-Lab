@@ -1,0 +1,10 @@
+14:23:06 **** Incremental Build of configuration Debug for project P2_EXTI_Button ****
+make -j8 all 
+arm-none-eabi-size  P2_EXTI_Button.elf 
+   text	   data	    bss	    dec	    hex	filename
+  10776	     12	   1716	  12504	   30d8	P2_EXTI_Button.elf
+Finished building: default.size.stdout
+ 
+
+14:23:07 Build Finished. 0 errors, 0 warnings. (took 325ms)
+
