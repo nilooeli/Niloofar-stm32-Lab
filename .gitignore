@@ -1,5 +1,7 @@
 # Ignore Eclipse/STM32CubeIDE workspace metadata
-/.metadata/
+**/.metadata/
+**/.settings/
+
 
 # Prerequisites
 *.d
@@ -58,10 +60,10 @@ dkms.conf
 *.dwo
 
 # STM32CubeIDE build artefacts
-Debug/
-Release/
+**/Debug/
+**/Release/
 /.build/
-/*.launch/
+
 *.iwd
 
 # Binaries & maps
