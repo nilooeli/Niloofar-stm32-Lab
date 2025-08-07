@@ -1,4 +1,0 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<session version="1.0">
-<refactoring comment="Rename resource &apos;ADC_Potentiometer&apos; to &apos;ADC_Pot_PWM&apos;" description="Rename resource &apos;ADC_Potentiometer&apos;" flags="7" id="org.eclipse.ltk.core.refactoring.rename.resource" input="/ADC_Potentiometer" name="ADC_Pot_PWM" stamp="1754350173121" updateReferences="true"/>
-</session>
