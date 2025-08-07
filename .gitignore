@@ -1,6 +1,10 @@
 # Ignore Eclipse/STM32CubeIDE workspace metadata
 **/.metadata/
 **/.settings/
+**/Debug/
+**/Release/
+# generic build artefacts
+*.d *.o *.elf *.hex *.map
 
 
 # Prerequisites
