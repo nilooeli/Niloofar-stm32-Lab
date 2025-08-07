@@ -1,91 +1,74 @@
-## STM32 Lab Projects (STM32F401RE)
+# P2_EXTI_Button
 
-This repository contains a series of embedded systems projects developed on the **STM32F401RE Nucleo** board using **STM32CubeIDE** and the **HAL** driver framework. The goal is to build up embedded programming skills through progressive hands-on labs, ranging from basic GPIO to advanced DMA, FreeRTOS, and low-power applications.
-
----
-
-## System Diagram
-
-![System Diagram](docs/System%20Diagram.png)
-
-## 📚 Overview
-
-Each project demonstrates a specific STM32 feature or embedded design pattern. They are structured in folders under `fw/` (firmware), named `P0`, `P1`, etc., to reflect the order and complexity of development.
+## 🔍 Goal
+Use external interrupt (EXTI) and a debounce timer to toggle an LED **once per valid button press**, even with mechanical bounce.
 
 ---
 
-## 📋 Project Task Table
-
-| Project | Feature                             | Goal                       | Done When                                    |
-|---------|-------------------------------------|----------------------------|-----------------------------|
-| **P0**  | GPIO + Clock Init                   | Blink LED @ 1Hz            | LED blinks reliably                          |
-| **P1**  | UART2 Printf                        | PC serial I/O              | "Hello, STM32" prints in terminal            |
-| **P2**  | EXTI Pushbutton + Debounce         | Interrupt + debounce       | Button press toggles LED once                |
-| **P3**  | TIM1 PWM -> LED                     | Hardware PWM               | LED fades smoothly                           |
-| **P4**  | ADC1 Potentiometer -> PWM          | Analog read + LED control  | Pot controls brightness                      |
-| **P5**  | I2C BMP280 (WHOAMI + raw)          | Basic I2C                  | IDs and raw values print                     |
-| **P6**  | BMP280 Calibration                 | Engineering units          | Temp/Pressure values look stable             |
-| **P7**  | UART Streaming                     | Structured CSV/JSON logs   | Log 60+ seconds without drop                 |
-| **P8**  | UART TX via DMA                    | Non-blocking comms         | System stays responsive during logging       |
-| **P9**  | Data Logging (Flash/SD)            | On-device storage          | Records survive power cycle                  |
-| **P10** | UART CLI                           | Runtime control            | You can change settings live                 |
-| **P11** | FreeRTOS Task Split                | Concurrency                | No starvation across tasks                   |
-| **P12** | Low Power + RTC                    | Energy awareness           | System sleeps + wakes reliably               |
-| **P13** | I2C DMA                            | Offload sensor reads       | Reads use minimal CPU                        |
-| **P14** | Watchdog + Fault Logging           | Self-recovery              | System resets + logs fault cause             |
-| **P15** | Integrated Demo App                | Interview showcase         | Full demo script runs end-to-end             |
+## ⚙️ Features
+- EXTI line triggered by pushbutton (PC13)
+- Timer-based debounce using TIM1 (~20ms)
+- LED toggles only once per press (PA5)
+- Code modularized into `button_exti.h/.c`
 
 ---
 
-## 🧰 Tools & Environment
+## 🔩 Hardware Setup
 
-- **Board**: STM32F401RE Nucleo
-- **IDE**: STM32CubeIDE
-- **Framework**: STM32 HAL (Hardware Abstraction Layer)
-- **Interface**: ST-Link USB (UART via virtual COM)
-- **Terminals**: PuTTY / Tera Term for serial output
+| Component   | Pin     | Function             |
+|-------------|---------|----------------------|
+| Pushbutton  | PC13    | EXTI input           |
+| LED         | PA5     | Output (toggle LED)  |
+
+> Using STM32F401RE Nucleo board (or similar)
 
 ---
 
-## 📁 Folder Structure
+## 🛠️ STM32CubeMX Configuration
 
-Niloofar-stm32-Lab/
-├── fw/
-│ ├── P0_BlinkLED/
-│ ├── UART-Printf/
-│ ├── P2_EXTI_Button/
-│ └── ...
-├── images/
-├── .gitignore
-└── README.md ← you are here
+### GPIO
+- PC13 → GPIO_EXTI13, Pull-up enabled
+- PA5  → Output Push-Pull, No pull
 
-yaml
+### NVIC
+- Enable `EXTI15_10_IRQn`
+- Enable `TIM1 Update Interrupt`
+
+### TIM1 Settings
+- Clock Source: Internal Clock
+- Prescaler: 8399
+- Counter Period: 1999  
+→ Yields ~20ms delay on 84 MHz clock
+
+---
+
+## 📄 Code Structure
+
+Core/
+├── Inc/
+│ ├── button_exti.h # Debounce + EXTI logic header
+├── Src/
+│ ├── button_exti.c # Debounce + EXTI implementation
+├── main.c # Calls EXTI handlers from HAL callbacks
+
+cpp
 Copy
 Edit
 
----
+### Usage in `main.c`
+```c
+#include "button_exti.h"
 
-## 🏁 Getting Started
+void HAL_GPIO_EXTI_Callback(uint16_t GPIO_Pin) {
+    Button_EXTI_Handler(GPIO_Pin);
+}
 
-To run any project:
+void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim) {
+    Button_Debounce_Timer_Handler(htim);
+}
+✅ Result
+LED toggles once per press
 
-1. Clone the repository:
-   ```bash
-   git clone https://github.com/nilooeli/Niloofar-stm32-Lab.git
-Open the .ioc file of the project in STM32CubeIDE.
+No multiple toggles from button bounce
 
-Build and flash to the STM32F401RE board via ST-Link.
-
-Monitor UART output if applicable (115200 8N1 via COM port).
-
-💡 Future Plans
- Add project diagrams for each task
-
- Add build instructions and test results per folder
-
- Include logic analyzer screenshots for verification
-
- Write blog or documentation pages per milestone
-
-🙏 Acknowledgments
-Special thanks to STMicroelectronics, CubeIDE team, and the embedded systems community for resources and tools.
+Button presses feel reliable and clean
