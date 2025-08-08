@@ -18,18 +18,20 @@
 /* USER CODE END Header */
 /* Includes ------------------------------------------------------------------*/
 #include "main.h"
-#include "tim.h"
+#include "i2c.h"
 #include "usart.h"
 #include "gpio.h"
 
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
-#include "pwm_fade.h"
+#include "bmp280_min.h"
+#include "i2c.h"
+#include <stdio.h>
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
 /* USER CODE BEGIN PTD */
-
+extern I2C_HandleTypeDef hi2c1;
 /* USER CODE END PTD */
 
 /* Private define ------------------------------------------------------------*/
@@ -56,7 +58,7 @@ void SystemClock_Config(void);
 
 /* Private user code ---------------------------------------------------------*/
 /* USER CODE BEGIN 0 */
-volatile uint8_t fade_requested = 0;
+
 /* USER CODE END 0 */
 
 /**
@@ -67,7 +69,15 @@ int main(void)
 {
 
   /* USER CODE BEGIN 1 */
-
+	uint8_t addr7=0, who=0;
+	if (!BMP280_Probe(&hi2c1, &addr7, &who)) {
+	    printf("BMP280 not found\r\n");
+	} else {
+	    printf("Found device at 0x%02X, WHOAMI=0x%02X\r\n", addr7, who);
+	    if (BMP280_StartNormal(&hi2c1, addr7) == HAL_OK) {
+	        HAL_Delay(50);
+	    }
+	}
   /* USER CODE END 1 */
 
   /* MCU Configuration--------------------------------------------------------*/
@@ -89,18 +99,8 @@ int main(void)
   /* Initialize all configured peripherals */
   MX_GPIO_Init();
   MX_USART2_UART_Init();
-  MX_TIM2_Init();
+  MX_I2C1_Init();
   /* USER CODE BEGIN 2 */
-  PWM_Fade_Init(); // Start PWM
-  __HAL_TIM_SET_COMPARE(&htim2, TIM_CHANNEL_1, 0);
-  while(1)
-  {
-	  if (fade_requested)
-	  {
-		  fade_requested = 0;
-		  PWM_FadeLED_once();
-	  }
-  }
 
   /* USER CODE END 2 */
 
@@ -108,11 +108,14 @@ int main(void)
   /* USER CODE BEGIN WHILE */
   while (1)
   {
-	  if (fade_requested)
+	  uint32_t rp, rt;
+	  if (BMP280_ReadRaw(&hi2c1, addr7, &rp, &rt) == HAL_OK)
 	  {
-		  fade_requested = 0;
-		  PWM_FadeLED_once();
+		  printf("RAW: press=%lu temp=%lu\r\n", rp, rt);
+	  } else {
+		  printf("I2C read error\r\n");
 	  }
+	  HAL_Delay(500);
     /* USER CODE END WHILE */
 
     /* USER CODE BEGIN 3 */
